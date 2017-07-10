@@ -1,0 +1,153 @@
+const searchLimit = 10;
+
+/*
+class SearchButton extends React.Component {
+  render(){
+    return(
+      <button>Search</button>
+    );
+  }
+}
+*/
+/*
+class SearchField extends React.Component {
+  render(){
+    return(
+      <input></input>
+    );
+  }
+}
+*/
+/*
+class SearchPanel extends React.Component {
+  render(){
+    return(
+      <SearchField /> <SearchButton />
+    );
+  }
+}
+*/
+
+
+
+class SearchPanel extends React.Component{
+
+  constructor(props) {
+    super(props);
+    this.handleSearch = this.handleSearch.bind(this);
+    this.handleKeyPress = this.handleKeyPress.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+    this.state = {defaultEntry: 'Search Here!',
+                 query: ''
+                 };
+  }
+  render() {
+    return(
+      <div classname = "searchPanel" style = {{}}>
+        <a href="https://en.wikipedia.org/wiki/Special:Random">View a Random Article</a><br />
+        <input classname = "searchField" value = {this.state.query} placeholder= "Search Here!" onKeyPress={this.handleKeyPress} onChange={this.handleChange}/>
+        <button classname = "searchButton" onClick={this.handleSearch}>Search!</button>
+        <Result resultSet = {this.state.resultSet} />
+      </div>
+    );
+  }
+  handleSearch() {
+    var searchURL;
+    this.setState({resultSet: null});
+    console.log('searching');
+    console.log(this.state.query);
+    console.log('why can i not pass this');
+    //get url to query wikipedia
+    searchURL = encodeURI("https://en.wikipedia.org/w/api.php?format=json&origin=*&action=query&generator=search&gsrnamespace=0&gsrlimit=" + searchLimit + "&prop=pageimages|extracts&pilimit=max&exintro&explaintext&exsentences=1&exlimit=max&gsrsearch=" + this.state.query);
+    console.log(searchURL);
+    //get json from wikipedia
+    fetch(searchURL)
+      .then((response) => response.json())
+      .then((responseJson) => {
+        //console.log(responseJson);
+        this.setState({resultSet: responseJson});
+    }) 
+      .catch((error) => {
+      console.error(error);
+    });
+
+  }
+  handleKeyPress(target) {
+    if(target.charCode==13){
+      console.log('search entered');
+      this.handleSearch();
+    }
+  }
+  handleChange(event){
+    this.setState({query: event.target.value});
+  }
+}
+
+
+
+
+
+
+
+function Result(props) {
+  var articles;
+  var articleDisplay;
+  var attempt;
+  if (!props.resultSet){
+    return null;
+  }else{
+    articles = props.resultSet;
+    console.log(articles.query.pages);   
+    var key = Object.keys(articles.query.pages);
+    var info = [key.length];
+    console.log(key);
+    for(var i = 0; i < key.length; i++){
+      var extrct = (articles.query.pages[key[i]].extract);
+      var title = (articles.query.pages[key[i]].title);
+      var pageID = (articles.query.pages[key[i]].pageid);
+      var sURL = "https://en.wikipedia.org/?curid=" + pageID
+      info[i] = <div><span><a href= {sURL}>{title}</a></span><span><p>{extrct}</p></span></div>;
+    };
+      /*
+      return (
+        <div>
+          <span><a href="https://en.wikipedia.org/?curid=" + {pageID}>{title}</a></span>
+          <span><p>{extrct}</p></span>
+        </div>
+      );
+      */
+      };
+    
+//    console.log(props.resultSet[0,0]);
+    return (
+      <div>
+        {info.map(function(listing){
+          return listing;
+        })}
+      </div>
+      /*
+      <div>
+      <p>{this.props.resultSet}</p>
+      
+
+      </div>
+      */
+    );
+}
+
+
+
+
+
+
+
+
+
+
+
+ReactDOM.render(
+  
+    <SearchPanel />
+  ,
+  document.getElementById('root')
+);
